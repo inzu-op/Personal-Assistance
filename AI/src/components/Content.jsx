@@ -198,7 +198,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
               </div>
               <button
                 onClick={() => handleCopy(item.question)}
-                className={`p-2 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 ${
+                className={`p-2 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 mt-2 ${
                   theme === "light" 
                     ? "hover:bg-[#F4DBEF] text-[#501854]" 
                     : "hover:bg-[#2B2532] text-white"
