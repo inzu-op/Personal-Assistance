@@ -27,22 +27,22 @@ const Login = () => {
         if (result.data.Status === "success") {
           if (result.data.role === "admin") {
             setMessage({ text: "Login successful!", type: "success" });
-            setTimeout(() => setBgBlack(true), 500);
-            setTimeout(() => setShowLanding(true), 1000);
-            setTimeout(() => navigate("/chat"), 6000);
-          } else {
-            setMessage({ text: "Sorry, you are not an admin.", type: "error" });
-          }
+            setBgBlack(true);
+            setShowLanding(true);
+            setTimeout(() => {
+              navigate("/chat");
+            }, 4000);
+          } 
         } else {
           setMessage({
-            text: "No user found , please signup first",
+            text: "No user found, please signup first",
             type: "error",
           });
         }
         setTimeout(() => setMessage({ text: "", type: "" }), 2000);
       })
       .catch(() => {
-        setMessage({ text: "Login failed. Please check your credentials.", type: "error" });
+        setMessage({ text: "Login failed. Please check your Email and password.", type: "error" });
         setTimeout(() => setMessage({ text: "", type: "" }), 2000);
       });
   };
@@ -50,18 +50,32 @@ const Login = () => {
   if (showLanding) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0 , y: 50 }}
+        animate={{ opacity: 1 ,y:0}}
         exit={{ opacity: 0 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.3 }}
         className="h-screen w-full flex flex-col justify-center items-center bg-black text-white font-poppins"
       >
-        <h1 className="text-4xl font-bold">Welcome to our AI Assistant</h1>
-        <p className="text-lg mt-2">redirecting to your Chats...</p>
+        <motion.h1
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="text-4xl font-bold"
+        >
+          Welcome to our AI Assistant
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
+          className="text-lg mt-2"
+        >
+          Redirecting to your Chats...
+        </motion.p>
       </motion.div>
     );
   }
-
+  
   return (
     <div className={`h-screen w-full flex justify-center items-center font-poppins transition-colors duration-1000 ${bgBlack ? "bg-black" : "bg-white"}`}>
       <AnimatePresence>
@@ -82,8 +96,8 @@ const Login = () => {
 
       <div className="w-full max-w-md p-8 text-black rounded-xl shadow-2xl bg-white">
         <div className="text-center">
-          <h1 className="text-3xl font-poppins text-[#2c3e50] font-bold mb-2">Welcome Back</h1>
-          <p className="text-sm text-[#7f8c8d]">Login to continue your journey.</p>
+        <h1 className="text-3xl font-poppins text-[#2c3e50] font-bold mb-2">Welcome to AI Assistant</h1>
+        <p className="text-md text-[#7f8c8d]">Login to continue your journey.</p>
         </div>
         <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
           <div className="relative">

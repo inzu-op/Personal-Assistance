@@ -44,14 +44,20 @@ const Structure = ({ isActive, setIsActive }) => {
   };
 
   // Add this function to handle list item clicks
-  const handleListItemClick = (text) => {
-    setAnswerHistory(prev => [...prev, { question: text, answer: "" }]);
-    // Trigger the AI response through Content component
-    if (contentRef.current) {
-      contentRef.current.triggerAnswer(text);
+  const isProcessingRef = useRef(false);
+
+  const handleListItemClick = async (text) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    try {
+      if (contentRef.current) {
+        await contentRef.current.triggerAnswer(text);
+      }
+    } finally {
+      isProcessingRef.current = false;
     }
   };
-
   const contentRef = useRef();
 
   return (
@@ -72,27 +78,42 @@ const Structure = ({ isActive, setIsActive }) => {
               <button 
                 className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors fixed top-5 ${
                   theme === "light" ? "hover:bg-[#F4DBEF]" : "hover:bg-gray-700"
-                } focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:text-foreground z-10 h-8 w-8 text-muted-foreground`} 
+                } focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-foreground z-10 h-8 w-8 text-muted-foreground`} 
                 data-sidebar="trigger"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg><span class="sr-only ">Toggle Sidebar</span></button>
-              </div>
-         
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="lucide lucide-panel-left"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                  <path d="M9 3v18"></path>
+                </svg>
+                <span className="sr-only">Toggle Sidebar</span>
+              </button>
+            </div>
           </div>
-          <button onClick={toggleTheme} className='mr-10 mb-5'>
-            <i
-              className={`fa-solid fa-moon text-xl fixed p-2 top-4 ${
+          <div className="fixed right-10 top-5 z-50">
+            <button 
+              onClick={toggleTheme}
+              className={`p-2 rounded-full transition-all duration-200 ${
                 theme === "light" ? "hover:bg-[#F4DBEF]" : "hover:bg-gray-700"
-              } rounded-3xl ${isLight ? 'fade-in-bottom' : 'fade-out-top'}`}
-              style={{ display: isLight ? 'inline' : 'none' }}
-            ></i>
-            <i
-              className={`fa-solid fa-sun text-xl fixed p-2 top-4 ${
-                theme === "light" ? "hover:bg-[#F4DBEF]" : "hover:bg-gray-700"
-              } rounded-3xl ${!isLight ? 'fade-in-bottom' : 'fade-out-top'}`}
-              style={{ display: !isLight ? 'inline' : 'none' }}
-            ></i>
-          </button>
+              }`}
+            >
+              {isLight ? (
+                <i className="fa-solid fa-moon text-xl"></i>
+              ) : (
+                <i className="fa-solid fa-sun text-xl"></i>
+              )}
+            </button>
+          </div>
         </div>
         <h1 className="font-bold text-4xl mt-5 ml-10">Chat AI</h1>
 
@@ -116,7 +137,6 @@ const Structure = ({ isActive, setIsActive }) => {
                     onClick={() => handleListItemClick(text)}
                   >
                     <span>{text}</span>
-                    
                   </li>
                 ))}
               </ul>

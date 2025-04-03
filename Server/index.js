@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require("mongoose");
 const { AdminModel, ConversationModel } = require("./module/database");
@@ -22,23 +23,26 @@ axios.defaults.withCredentials = true;
 
 const port = 3000;
 
-mongoose.connect("mongodb://127.0.0.1:27017/chat")
-    .then(res => console.log("Connected to MongoDB"))
+const jwtSecretKey = process.env.JWT_SECRET_KEY;
+const mongoDBUri = process.env.MONGODB_URI;
+console.log("MongoDB URI:", mongoDBUri);
+
+mongoose.connect(mongoDBUri)
+    .then(() => console.log("Connected to MongoDB"))
     .catch(err => console.error("MongoDB connection error:", err));
 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
-        return res.status(404).json("no token available");
-    } else {
-        jwt.verify(token, "jwt-secret-key", (err, decoded) => {
-            if (err) {
-                return res.json("error with Token");
-            }
-            req.user = decoded;
-            next();
-        });
+        return res.status(404).json({ error: "No token available" });
     }
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ error: "Invalid token" });
+        }
+        req.user = decoded;
+        next();
+    });
 };
 
 app.post("/signup", (req, res) => {
@@ -60,22 +64,22 @@ app.post("/login", (req, res) => {
                 if (user) {
                     bcrypt.compare(password, user.password, (err, result) => {
                         if (result) {
-                            const token = jwt.sign({ email: user.email, role: user.role }, "jwt-secret-key", { expiresIn: "1d" })
-                            res.cookie("token", token)
-                            res.json({ Status: "success", role: user.role })
+                            const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "1d" });
+                            res.cookie("token", token, { httpOnly: true, secure: false });
+                            res.json({ Status: "success", role: user.role });
                         } else {
-                            res.status(401).json("incorrect password")
+                            res.status(401).json("incorrect password");
                         }
-                    })
+                    });
                 } else {
-                    res.json("no user found")
+                    res.status(404).json("no user found");
                 }
             })
-            .catch(err => res.json(err))
+            .catch(err => res.status(500).json(err));
     } catch (err) {
-        res.json(err)
+        res.status(500).json(err);
     }
-})
+});
 
 app.get("/chat", verifyUser, (req, res) => {
     res.send("hello")
@@ -89,7 +93,7 @@ app.post('/chatbot', verifyUser, async (req, res) => {
         }
 
         const token = req.cookies.token;
-        const decoded = jwt.verify(token, "jwt-secret-key");
+        const decoded = jwt.verify(token,jwtSecretKey);
         const adminEmail = decoded.email;
 
         // Fetch the conversation history for the user
@@ -111,9 +115,11 @@ app.post('/chatbot', verifyUser, async (req, res) => {
             `User: ${conv.question}\nAI: ${conv.answer}`
         ).join('\n') + `\nUser: ${inputText}\nAI:`;
 
-        const apiKey = "AIzaSyBcFRPBAgoWBlQxpb2ygjX7iV_0cPwk8lI";
+        const apiKey = process.env.API_KEY;
+        const apiUrl = process.env.API_URL;
+
         const geminiResponse = await axios({
-            url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+            url: `${apiUrl}?key=${apiKey}`,
             method: "post",
             headers: {
                 "Content-Type": "application/json",
@@ -264,7 +270,7 @@ app.post('/chatbot', verifyUser, async (req, res) => {
 app.get('/conversations', verifyUser, async (req, res) => {
     try {
         const token = req.cookies.token;
-        const decoded = jwt.verify(token, "jwt-secret-key");
+        const decoded = jwt.verify(token,jwtSecretKey);
         const admin = await AdminModel.findOne({ email: decoded.email })
             .populate('conversations');
         res.json(admin.conversations);
