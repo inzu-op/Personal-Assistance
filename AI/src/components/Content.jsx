@@ -18,10 +18,10 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
   const { theme } = useContext(ThemeContext);
   const [copyNotification, setCopyNotification] = useState({ show: false, text: '' });
 
-  // Ref for the chat history container
+  
   const chatHistoryRef = useRef(null);
 
-  // Modify the localStorage effect to only save, not load
+ 
   useEffect(() => {
     localStorage.setItem("chatHistory", JSON.stringify(answerHistory));
   }, [answerHistory]);
@@ -104,19 +104,19 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
     }
   };
 
-  // Function to handle clicking on a question in the history
+  
   const handleQuestionClick = (question) => {
-    setInputText(question); // Set the clicked question as the current input
-    Answer(question); // Trigger the Answer function to get a response
+    setInputText(question);
+    Answer(question);
   };
 
-  // Function to trigger answer from parent
+ 
   const triggerAnswer = (text) => {
     setInputText(text);
     Answer(text);
   };
 
-  // Expose the triggerAnswer function to parent
+  
   useImperativeHandle(ref, () => ({
     triggerAnswer
   }));
@@ -125,7 +125,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
     if (isLoading) return;
     navigator.clipboard.writeText(text);
     
-    // Show enhanced notification
+   
     setCopyNotification({ show: true, text: 'Text copied to clipboard successfully!' });
     
     setTimeout(() => {
@@ -134,7 +134,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
   };
 
   const handleLike = (index) => {
-    if (isLoading) return; // Prevent action during loading
+    if (isLoading) return;
     setLikedAnswers(prev => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {
@@ -152,7 +152,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
   };
 
   const handleDislike = (index) => {
-    if (isLoading) return; // Prevent action during loading
+    if (isLoading) return;
     setDislikedAnswers(prev => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {
@@ -171,7 +171,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
 
   return (
     <div className="content flex flex-col justify-between flex-grow relative">
-      {/* Enhanced Copy Notification */}
+      
       {copyNotification.show && (
         <div className="fixed top-4 right-4 bg-white shadow-lg rounded-lg overflow-hidden animate-slideIn">
           <div className={`px-4 py-3 flex items-center gap-2 ${
@@ -189,7 +189,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
       >
         {answerHistory.map((item, index) => (
           <div key={index} className="mb-4 w-full">
-            {/* Question Block with External Copy Button */}
+        
             <div className="flex items-start gap-2 relative group">
               <div className={`text-left font-semibold p-4 rounded-2xl ${
                 theme === "light" ? "bg-[#F4DBEF]" : "bg-[#2B2532]"
@@ -208,7 +208,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
               </button>
             </div>
 
-            {/* Answer Block */}
+          
             <div className="mt-3">
               <div
                 className={`text-left p-4 rounded-2xl flex-grow ${
@@ -250,7 +250,7 @@ const Content = forwardRef(({ answerHistory, setAnswerHistory }, ref) => {
               </div>
             </div>
 
-            {/* Action buttons below the answer */}
+    
             {!isLoading && item.answer && (
               <div className={`flex gap-2 mt-2 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 <button
