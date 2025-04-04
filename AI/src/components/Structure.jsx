@@ -43,7 +43,6 @@ const Structure = ({ isActive, setIsActive }) => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
-  // Add this function to handle list item clicks
   const isProcessingRef = useRef(false);
 
   const handleListItemClick = async (text) => {
@@ -68,7 +67,7 @@ const Structure = ({ isActive, setIsActive }) => {
         setAnswerHistory={setAnswerHistory}
       />
       <div className="main rounded-lg transition-all duration-200 ease-in-out p-2 custom-scrollbar" style={contentStyle}>
-        {/* Header with Menu Icon */}
+      
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div
@@ -117,12 +116,11 @@ const Structure = ({ isActive, setIsActive }) => {
         </div>
         <h1 className="font-bold text-4xl mt-5 ml-10">Chat AI</h1>
 
-        {/* AI Assistant Message */}
+       
         <div className="ai-message text-center mt-20">
           <h2 className="text-3xl font-semibold mb-4 mr-40">How can I help you?</h2>
         </div>
 
-        {/* Placeholder Content */}
         <div className="placeholder-content flex-grow custom-scrollbar">
           <div className="flex justify-center items-center">
             <div className="p-6 rounded-lg">
@@ -144,7 +142,6 @@ const Structure = ({ isActive, setIsActive }) => {
           </div>
         </div>
 
-        {/* Chat Content */}
         <Content 
           ref={contentRef}
           answerHistory={answerHistory} 
