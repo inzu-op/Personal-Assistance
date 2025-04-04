@@ -22,58 +22,55 @@ const Slider = ({ isActive, setIsActive, setAnswerHistory }) => {
 
     const handleDelete = async () => {
         try {
-            // Make sure selectedConv exists and has an _id
             if (!selectedConv || !selectedConv._id) {
                 console.error('No conversation selected for deletion');
                 return;
             }
 
-            // Delete from backend
+           
             const response = await axios.delete(`http://localhost:3000/conversation/${selectedConv._id}`, {
                 withCredentials: true
             });
 
             if (response.status === 200) {
-                // Update the local state to remove the deleted conversation
+                
                 setConversations(prevConversations =>
                     prevConversations.filter(conv => conv._id !== selectedConv._id)
                 );
-
-                // Show success message (optional)
                 console.log('Conversation deleted successfully');
             }
 
-            // Close the popup
+     
             setShowDeletePopup(false);
             setSelectedConv(null);
 
         } catch (error) {
             console.error('Error deleting conversation:', error);
-            // Optionally show error message to user
+           
             alert('Failed to delete conversation. Please try again.');
         }
     };
 
     const handleNewChat = () => {
-        // Clear local storage
+   
         localStorage.removeItem("chatHistory");
-        // Clear answer history in Content component
+     
         setAnswerHistory([]);
-        // Close the slider
+     
         setIsActive(false);
     };
 
     const handleConversationClick = (conv) => {
-        // Update the answer history with the clicked conversation
+        
         setAnswerHistory(prevHistory => [...prevHistory, {
             question: conv.question,
             answer: conv.answer
         }]);
 
-        // Close the slider after selecting a conversation
+       
         setIsActive(false);
 
-        // Scroll to the conversation after a short delay
+      
         setTimeout(() => {
             const chatHistoryElement = document.querySelector('.para');
             if (chatHistoryElement) {
@@ -97,20 +94,20 @@ const Slider = ({ isActive, setIsActive, setAnswerHistory }) => {
     const fetchConversations = async () => {
         try {
             const response = await axios.get('http://localhost:3000/conversations', {
-                withCredentials: true // Ensure cookies are sent with the request
+                withCredentials: true
             });
             setConversations(response.data);
         } catch (error) {
             console.error('Error fetching conversations:', error);
-            // Handle unauthorized access
+            
             if (error.response && error.response.status === 401) {
-                // Redirect to login or show a message
+              
                 console.log("Unauthorized access, please log in again.");
             }
         }
     };
 
-    // Call fetchConversations after successful login
+   
     useEffect(() => {
         fetchConversations();
     }, [conversations]);
@@ -194,15 +191,13 @@ const Slider = ({ isActive, setIsActive, setAnswerHistory }) => {
                 </div>
             </div>
 
-            {/* Delete Confirmation Popup */}
+           
             {showDeletePopup && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 animate-fadeIn">
-                    {/* Backdrop with blur */}
+                   
                     <div className="absolute inset-0 bg-black/10 backdrop-brightness-50"
                         onClick={() => setShowDeletePopup(false)}
                     ></div>
-
-                    {/* Popup content */}
                     <div
                         className={`${theme === 'light' ? 'bg-white text-[#501854]' : 'bg-[#1D121A] text-white'
                             } rounded-lg p-6 w-[400px] shadow-xl relative animate-scaleIn`}
