@@ -96,21 +96,18 @@ app.post('/chatbot', verifyUser, async (req, res) => {
         const decoded = jwt.verify(token,jwtSecretKey);
         const adminEmail = decoded.email;
 
-        // Fetch the conversation history for the user
         const admin = await AdminModel.findOne({ email: adminEmail }).populate('conversations');
         
-        // Define the maximum number of previous conversations to include
-        const MAX_HISTORY_SIZE = 10; // Change this value as needed
+        const MAX_HISTORY_SIZE = 10; 
 
-        // Get the last MAX_HISTORY_SIZE conversations
+    
         const conversationHistory = admin.conversations
-            .slice(-MAX_HISTORY_SIZE) // Limit the history size
+            .slice(-MAX_HISTORY_SIZE) 
             .map(conv => ({
                 question: conv.question,
                 answer: conv.answer
             }));
 
-        // Prepare the AI input with conversation history
         const aiInput = conversationHistory.map(conv => 
             `User: ${conv.question}\nAI: ${conv.answer}`
         ).join('\n') + `\nUser: ${inputText}\nAI:`;
@@ -132,14 +129,12 @@ app.post('/chatbot', verifyUser, async (req, res) => {
                             text: aiInput + 
                             " Response Guidelines:" +
 
-                            // General Response Format
                             " 1. Response Structure:" +
                             "    - Use simple, clear language" +
                             "    - Keep health responses to 3-4 lines" +
                             "    - Use emojis for engagement 😊" +
                             "    - Include follow-up questions" +
 
-                            // Health and Wellness Focus
                             " 2. Health Topics:" +
                             "    - Physical health and fitness" +
                             "    - Mental wellness and stress management" +
@@ -148,7 +143,6 @@ app.post('/chatbot', verifyUser, async (req, res) => {
                             "    - Sleep and recovery" +
                             "    - Preventive care" +
 
-                            // Project-Related Responses
                             " 3. Project Responses:" +
                             "    - Categorize by difficulty (Beginner/Intermediate/Advanced)" +
                             "    - List prerequisites and requirements" +
@@ -161,8 +155,7 @@ app.post('/chatbot', verifyUser, async (req, res) => {
                             "      * Implementation Steps: [Numbered List]" +
                             "      * Timeline: [Duration]" +
                             "      * Resources: [Links/References]" +
-
-                            // Response Types
+                                
                             " 4. Response Categories:" +
                             "    A. Health Queries:" +
                             "       - Brief, focused answers" +
@@ -175,21 +168,21 @@ app.post('/chatbot', verifyUser, async (req, res) => {
                             "       - Practical examples and code snippets" +
                             "       - Best practices and tips" +
 
-                            // Interaction Rules
+                
                             " 5. Interaction Guidelines:" +
                             "    - For single-word responses: Ask clarifying questions" +
                             "    - For health topics: Stay within medical guidelines" +
                             "    - For projects: Focus on practical implementation" +
                             "    - Always maintain professional tone" +
 
-                            // Special Formatting
+                           
                             " 6. Special Elements:" +
                             "    - Use bullet points for lists" +
                             "    - Include motivational quotes when relevant" +
                             "    - Add warning boxes for important notes" +
                             "    - Use code formatting for technical content" +
 
-                            // Example Project Response:
+                       
                             " Example Project Response Format:" +
                             " Project: [Name]" +
                             " Level: [Beginner/Intermediate/Advanced]" +
@@ -205,7 +198,7 @@ app.post('/chatbot', verifyUser, async (req, res) => {
                             " - Resource 1" +
                             " - Resource 2" +
 
-                            // Restrictions
+                            
                             " 7. Content Restrictions:" +
                             "    - No adult content" +
                             "    - No political discussions" +
@@ -219,27 +212,27 @@ app.post('/chatbot', verifyUser, async (req, res) => {
                     temperature: 0.7,
                     topK: 40,
                     topP: 0.95,
-                    maxOutputTokens: 500, // Increased for detailed project responses
+                    maxOutputTokens: 500,
                 }
             },
         });
 
         console.log("Gemini API Response:", geminiResponse.data);
 
-        // Extract the response text
+   
         const responseText = geminiResponse.data.candidates[0].content.parts[0].text;
 
-        // Create the conversation
+     
         const conversation = {
             question: inputText,
             answer: responseText,
             timestamp: new Date()
         };
 
-        // Save to ConversationModel
+        
         const savedConversation = await ConversationModel.create(conversation);
 
-        // Add to admin's conversations
+   
         await AdminModel.findOneAndUpdate(
             { email: adminEmail },
             { $push: { conversations: savedConversation._id } }
@@ -279,23 +272,23 @@ app.get('/conversations', verifyUser, async (req, res) => {
     }
 });
 
-// Delete conversation endpoint
+
 app.delete('/conversation/:id', verifyUser, async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Verify the conversation exists
+  
         const conversation = await ConversationModel.findById(id);
         if (!conversation) {
             return res.status(404).json({ message: 'Conversation not found' });
         }
 
-        // Delete the conversation
+       
         await ConversationModel.findByIdAndDelete(id);
 
-        // Remove the reference from the admin's conversations array
+        
         await AdminModel.updateOne(
-            { email: req.user.email }, // Use email from the verified user
+            { email: req.user.email },
             { $pull: { conversations: id } }
         );
 
